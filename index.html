@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Chúc Mừng Sinh Nhật 19 Tuổi!</title>
+  <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Playwrite+NO:wght@100..400&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --navy: #25344F;
+      --slate: #617891;
+      --tan: #D5B893;
+      --coffee: #6F4D38;
+      --maroon: #632024;
+    }
+
+    body {
+      margin: 0; padding: 0; min-height: 100vh;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      background: radial-gradient(circle at center, var(--slate) 0%, var(--navy) 100%);
+      font-family: 'Segoe UI', Tahoma, sans-serif; overflow: hidden; color: var(--tan);
+    }
+
+    /* --- CHUNG --- */
+    .hidden { display: none !important; }
+    h1, h2 { font-family: 'Playwrite NO'; margin: 0; }
+    .btn {
+      padding: 12px 30px; background: var(--maroon); color: var(--tan);
+      border: none; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.3s;
+      font-size: 1.1rem; box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    }
+    .btn:hover { background: var(--coffee); transform: translateY(-2px); }
+
+    /* --- 0. LOADING --- */
+    #loading-screen {
+      position: fixed; inset: 0; z-index: 10000; background: var(--navy);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      transition: opacity 0.8s ease;
+    }
+    .loading-wrapper { width: 80%; max-width: 400px; text-align: center; }
+    .loading-text { font-size: 1.2rem; margin-bottom: 30px; letter-spacing: 3px; color: var(--tan); }
+    .progress-track { position: relative; width: 100%; height: 8px; background: rgba(255,255,255,0.1); border-radius: 10px; }
+    .progress-fill { height: 100%; width: 0%; background: var(--tan); border-radius: 10px; transition: width 0.1s linear; }
+    .progress-thumb {
+      position: absolute; top: 50%; left: 0%; 
+      width: 50px; height: 50px; 
+      transition: left 0.1s linear;
+      background-image: url('icon_loading.png'); 
+      background-size: contain; background-repeat: no-repeat;
+      background-position: center;
+
+      animation: headWobble 0.6s infinite ease-in-out;
+    }
+
+    @keyframes headWobble {
+      0%, 100% { transform: translate(-50%, -50%) rotate(-15deg); }
+      50% { transform: translate(-50%, -50%) rotate(15deg); }
+    }
+
+    /* --- 1. MẬT MÃ --- */
+    #lock-screen {
+      position: fixed; inset: 0; z-index: 999; display: flex; justify-content: center; align-items: center;
+      background: rgba(37, 52, 79, 0.9);
+    }
+    .lock-box {
+      background: var(--tan); padding: 40px; border-radius: 15px; text-align: center;
+      border: 3px double var(--maroon); box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+    }
+    .lock-box h2 { color: var(--maroon); font-size: 2.5rem; margin-bottom: 15px; }
+    .lock-box input {
+      padding: 12px; width: 220px; border-radius: 8px; border: 2px solid var(--coffee);
+      text-align: center; outline: none; margin-bottom: 20px; font-size: 1rem; color: var(--navy);
+    }
+
+    /* --- 2. GAME ĐÀO VÀNG --- */
+    #game-screen {
+      display: none; flex-direction: column; align-items: center; width: 100%; height: 100vh;
+      position: relative; overflow: hidden;
+    }
+    #game-header {
+      position: absolute; top: 20px; width: 90%; max-width: 500px;
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: 1.2rem; font-weight: bold; background: rgba(0,0,0,0.2);
+      padding: 10px 20px; border-radius: 15px; z-index: 10;
+    }
+    #game-area {
+      position: relative; width: 100%; max-width: 600px; height: 70vh;
+      margin-top: 80px; border-bottom: 5px solid var(--coffee);
+      background: rgba(111, 77, 56, 0.1); border-radius: 10px 10px 0 0;
+      cursor: crosshair;
+    }
+    .miner-station {
+      position: absolute; top: -10px; left: 50%; transform: translateX(-50%);
+      width: 60px; height: 40px; background: var(--maroon); border-radius: 5px 5px 0 0; z-index: 5;
+    }
+    .crane-line {
+      position: absolute; top: 30px; left: 50%; width: 2px; height: 50px;
+      background: var(--tan); transform-origin: top center; z-index: 4;
+    }
+    .hook {
+      position: absolute; bottom: -15px; left: -9px; width: 20px; height: 20px;
+      border: 3px solid var(--tan); border-top: none; border-radius: 0 0 10px 10px;
+    }
+    .item { position: absolute; font-size: 2rem; user-select: none; transition: transform 0.2s; }
+    .item.caught { z-index: 6; }
+    #game-over {
+      position: absolute; inset: 0; background: rgba(0,0,0,0.8);
+      display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 20;
+    }
+
+    /* --- 3. BÁNH KEM --- */
+    #cake-screen {
+      display: none; flex-direction: column; align-items: center; opacity: 0; transition: opacity 1s;
+    }
+    .cake-display { position: relative; width: 350px; display: flex; justify-content: center; align-items: center; }
+    .cake-img { width: 100%; height: auto; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.4); }
+    .flame {
+      position: absolute; transform: translateX(-50%); width: 22px; height: 38px;
+      background: radial-gradient(circle, #fff 0%, #ffeb3b 40%, #ff9800 80%, transparent 100%);
+      border-radius: 50% 50% 20% 20%; box-shadow: 0 0 20px #ff9800, 0 0 40px #ff9800;
+      animation: flicker 0.1s infinite alternate; cursor: pointer;
+    }
+    .flame.out { opacity: 0; transform: translateX(-50%) scale(0); transition: 0.5s; }
+
+    /* --- LÁ THƯ --- */
+    #letter-screen {
+      display: none; width: 85%; max-width: 500px; padding: 40px 30px;
+      background: var(--tan); border-radius: 5px; position: relative;
+      box-shadow: 0 30px 60px rgba(0,0,0,0.6); z-index: 100;
+    }
+    #letter-screen::before {
+      content: ''; position: absolute; inset: 10px;
+      border: 2px solid var(--maroon); pointer-events: none; border-radius: 4px;
+    }
+    
+    #letter-text { 
+      font-family: 'Playwrite NO', italic; font-size: 1.8rem; line-height: 1.7; 
+      color: var(--navy); white-space: pre-wrap; 
+      max-height: 55vh; overflow-y: auto; padding-right: 15px;
+    }
+    
+    #letter-text::-webkit-scrollbar { width: 6px; }
+    #letter-text::-webkit-scrollbar-track { background: rgba(0,0,0,0.05); border-radius: 10px; }
+    #letter-text::-webkit-scrollbar-thumb { background: var(--coffee); border-radius: 10px; }
+
+    .countdown { position: fixed; top: 20px; right: 20px; font-size: 3rem; font-family: 'Pacifico'; display: none; }
+
+    @keyframes flicker { 0%, 100% { transform: translateX(-50%) scale(1) rotate(-2deg); } 50% { transform: translateX(-50%) scale(1.1) rotate(2deg); } }
+  </style>
+</head>
+<body>
+
+  <div id="loading-screen">
+    <div class="loading-wrapper">
+      <div class="loading-text" id="loading-text">Loading 0%</div>
+      <div class="progress-track">
+        <div class="progress-fill" id="progress-fill"></div>
+        <div class="progress-thumb" id="progress-thumb"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="lock-screen" class="hidden">
+    <div class="lock-box">
+      <h2>Mật khẩu (chống bot thôi)</h2>
+      <p style="color: var(--navy); font-weight: bold;">T thích gọi m là gì?</p>
+      <input type="text" id="pass-input" placeholder="Trả lời..." style="color: var(--navy);">
+      <br><button class="btn" onclick="checkPass()">Mở Khóa</button>
+    </div>
+  </div>
+
+  <div id="game-screen" class="hidden">
+    <div id="game-header">
+      <span>Gắp 5 mục tiêu để mở quà</span>
+      <span id="score">Đã gắp: 0/5</span>
+    </div>
+    <div id="game-area" onclick="shootHook()">
+      <div class="miner-station"></div>
+      <div class="crane-line" id="crane"><div class="hook"></div></div>
+      <div id="items-container"></div>
+    </div>
+    <p style="margin-top: 20px;">(Click/Chạm vào màn hình để thả câu)</p>
+    
+    <div id="game-over" class="hidden">
+      <div class="lock-box">
+        <h2> Oidoioi 💣</h2>
+        <p style="color: var(--navy); font-weight: bold;">Gắp trúng bom rồi bro!</p>
+        <button class="btn" onclick="initGame()">Chơi lại</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="cake-screen" class="hidden">
+    <h1 style="font-family: 'Pacifico'; font-size: 2.5rem; margin-bottom: 20px;">Happy 19th! 🎂</h1>
+    <div class="cake-display">
+      <img src="banh_kem.png" class="cake-img" alt="Birthday Cake">
+      <div class="flame" id="f1" style="top: 5%; left: 43%;"></div>
+      <div class="flame" id="f9" style="top: 5%; left: 59%;"></div>
+    </div>
+    <p id="hint" style="font-style: italic; opacity: 0.7; margin-top: 30px;">(Thổi vào mic hoặc click nến để tắt)</p>
+  </div>
+
+  <div id="letter-screen" class="hidden"><div id="letter-text" id="scrollable-text"></div></div>
+  <div class="countdown" id="timer">3</div>
+
+  <script>
+    const PASS = ["linh", "Linh"];
+    const MSG = "Dear Linh,\n\nĐây chắc là lần đầu tiên bạn viết thư cho m, lại còn nghĩ ra mấy cái trò vô tri ni nữa, ngại vl 🫣. T đã dành gần một ngày vò đầu bứt tóc để làm cái minigame ni và fix một đống lỗi (không fix được nên t xóa rồi), mặc dù hơi xấu nma mong bạn thông cảm :((\n\nAnyway, hôm nay là sinh nhật m rồi, mong là twy của tuổi mới sẽ ít gặp phải những áp lực từ học hành (toán cao cấp chẳng hạn), tiền bạc và các mối quan hệ xung quanh. Và kể cả nếu gặp phải thì chúc m sẽ luôn tìm được cách để cân bằng mọi thứ, m giỏi mà hehe. (Hoặc là m có thể yap với t nếu m muốn, hầu hết là t không hiểu mô).\n\nÀ mà lớn rồi, uống nước nhiều lên, thức khuya ít thôi nhé!!!\n\nBest Wishes, \n\n be (kphai nerd).";
+
+    window.onload = () => {
+      let p = 0;
+      // Trỏ đúng ID trong HTML
+      const t = document.getElementById('loading-text');
+      const f = document.getElementById('progress-fill');
+      const b = document.getElementById('progress-thumb');
+      
+      const iv = setInterval(() => {
+        p += Math.floor(Math.random() * 5) + 2; 
+        if(p > 100) p = 100;
+        
+        t.innerText = `Loading ${p}%`; 
+        f.style.width = p + "%"; 
+        b.style.left = p + "%";
+        
+        if(p === 100) {
+          clearInterval(iv);
+          setTimeout(() => {
+            document.getElementById('loading-screen').style.opacity = "0";
+            setTimeout(() => {
+              document.getElementById('loading-screen').classList.add('hidden');
+              document.getElementById('lock-screen').classList.remove('hidden');
+            }, 800);
+          }, 500);
+        }
+      }, 50);
+    };
+
+    function checkPass() {
+      const v = document.getElementById('pass-input').value.toLowerCase().trim();
+      if(PASS.includes(v)) {
+        document.getElementById('lock-screen').classList.add('hidden');
+        const gameScreen = document.getElementById('game-screen');
+        gameScreen.classList.remove('hidden');
+        gameScreen.style.display = 'flex';
+        initGame();
+      } else alert("Sai rùi!");
+    }
+
+    // --- Game Logic ---
+    let score = 0, angle = -60, angleDir = 1, hookLen = 50, isShooting = false, isReturning = false, hookInterval;
+    const crane = document.getElementById('crane'), itemsCnt = document.getElementById('items-container');
+
+    function initGame() {
+      document.getElementById('game-over').classList.add('hidden');
+      score = 0; document.getElementById('score').innerText = `Đã gắp: 0/5`;
+      isShooting = false; isReturning = false; hookLen = 50; crane.style.height = '50px';
+      
+      itemsCnt.innerHTML = '';
+      let stuckItem = crane.querySelector('.caught'); 
+      if(stuckItem) stuckItem.remove();
+
+      const GOOD_ICONS = ['🎁', '💖', '🎂', '💌'];
+      let itemsList = ['💣', '💣', '💣']; 
+      for(let i = 0; i < 8; i++) itemsList.push(GOOD_ICONS[Math.floor(Math.random() * GOOD_ICONS.length)]);
+
+      let placedPositions = [];
+      const MIN_DISTANCE = 15; 
+
+      for(let i = 0; i < itemsList.length; i++) {
+        let el = document.createElement('div'); el.className = 'item';
+        let type = itemsList[i]; el.innerText = type; el.dataset.type = type;
+        
+        let posX, posY, isOverlapping, attempts = 0;
+        do {
+          isOverlapping = false;
+          posX = 10 + Math.random() * 80; posY = 30 + Math.random() * 60; 
+          for(let j = 0; j < placedPositions.length; j++) {
+            let dx = posX - placedPositions[j].x;
+            let dy = posY - placedPositions[j].y;
+            if(Math.sqrt(dx * dx + dy * dy) < MIN_DISTANCE) { isOverlapping = true; break; }
+          }
+          attempts++;
+        } while (isOverlapping && attempts < 50); 
+        placedPositions.push({ x: posX, y: posY });
+        el.style.left = posX + '%'; el.style.top = posY + '%';
+        itemsCnt.appendChild(el);
+      }
+      
+      clearInterval(hookInterval); hookInterval = setInterval(gameLoop, 20);
+    }
+
+    function gameLoop() {
+      if(!isShooting && !isReturning) {
+        angle += angleDir * 2; if(angle > 60 || angle < -60) angleDir *= -1;
+        crane.style.transform = `rotate(${angle}deg)`;
+      } else if(isShooting) {
+        hookLen += 8; crane.style.height = hookLen + 'px';
+        checkCollision(); if(hookLen > 400) { isShooting = false; isReturning = true; }
+      } else if(isReturning) {
+        hookLen -= 8; crane.style.height = hookLen + 'px';
+        let caught = document.querySelector('.caught');
+        if(caught) { caught.style.top = '100%'; caught.style.left = '50%'; caught.style.transform = 'translate(-50%, -50%)'; crane.appendChild(caught); }
+        if(hookLen <= 50) {
+          isReturning = false; hookLen = 50; crane.style.height = '50px';
+          if(caught) {
+            if(caught.dataset.type === '💣') { clearInterval(hookInterval); document.getElementById('game-over').classList.remove('hidden'); }
+            else { score++; document.getElementById('score').innerText = `Đã gắp: ${score}/5`; caught.remove(); if(score >= 5) winGame(); }
+          }
+        }
+      }
+    }
+
+    function shootHook() { if(!isShooting && !isReturning) isShooting = true; }
+    function checkCollision() {
+      if(document.querySelector('.caught')) return;
+      const hookRect = document.querySelector('.hook').getBoundingClientRect();
+      document.querySelectorAll('.item:not(.caught)').forEach(item => {
+        const itemRect = item.getBoundingClientRect();
+        if (hookRect.left < itemRect.right && hookRect.right > itemRect.left && hookRect.top < itemRect.bottom && hookRect.bottom > itemRect.top) {
+          item.classList.add('caught'); isShooting = false; isReturning = true;
+        }
+      });
+    }
+
+    // --- Win Game & Thổi nến ---
+    function winGame() {
+      clearInterval(hookInterval);
+      document.getElementById('game-screen').classList.add('hidden');
+      document.getElementById('game-screen').style.display = 'none';
+
+      const cs = document.getElementById('cake-screen');
+      cs.classList.remove('hidden'); cs.style.display = 'flex';
+      setTimeout(() => cs.style.opacity = "1", 50);
+      
+      document.getElementById('f1').onclick = function(){ extinguishCake(this) };
+      document.getElementById('f9').onclick = function(){ extinguishCake(this) };
+      initMic();
+    }
+
+    let lit = 2, cakeDone = false;
+    function extinguishCake(el) {
+      if(!el.classList.contains('out')) {
+        el.classList.add('out'); lit--;
+        if(lit <= 0 && !cakeDone) { cakeDone = true; finishBirthday(); }
+      }
+    }
+
+    function finishBirthday() {
+      document.getElementById('hint').innerText = "Oaaaa! Chúc mừng sinh nhật!!!";
+      let s = 3; const timer = document.getElementById('timer'); timer.style.display = 'block';
+      const cd = setInterval(() => {
+        s--; timer.innerText = s;
+        if(s <= 0) {
+          clearInterval(cd); timer.style.display = 'none';
+          document.getElementById('cake-screen').classList.add('hidden');
+          const ls = document.getElementById('letter-screen');
+          ls.classList.remove('hidden'); ls.style.display = 'block';
+          
+          let i = 0;
+          const textEl = document.querySelector('#letter-screen #letter-text'); 
+          textEl.textContent = ""; 
+          
+          function type() { 
+            if(i < MSG.length) { 
+              textEl.textContent += MSG[i]; 
+              i++; 
+              textEl.scrollTop = textEl.scrollHeight;
+              setTimeout(type, 35); 
+            } 
+          }
+          type();
+        }
+      }, 1000);
+    }
+
+    function initMic() {
+      navigator.mediaDevices.getUserMedia({ audio: true }).then(s => {
+        const ctx = new AudioContext(), ana = ctx.createAnalyser();
+        ctx.createMediaStreamSource(s).connect(ana);
+        const data = new Uint8Array(ana.frequencyBinCount);
+        function checkMic() {
+          if(cakeDone) return;
+          ana.getByteFrequencyData(data);
+          if(data.reduce((a, b) => a + b) / data.length > 45) { 
+            const act = document.querySelectorAll('.flame:not(.out)');
+            if(act.length > 0) extinguishCake(act[Math.floor(Math.random()*act.length)]);
+          }
+          requestAnimationFrame(checkMic);
+        }
+        checkMic();
+      }).catch(e => console.log("Mic blocked"));
+    }
+  </script>
+</body>
+</html>
